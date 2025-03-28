@@ -1,31 +1,46 @@
-package org.example;
+package eu.casd;
 
+import com.epam.parso.Column;
 import com.epam.parso.SasFileReader;
 import com.epam.parso.impl.SasFileReaderImpl;
-
+import com.epam.parso.SasFileProperties;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 public class SasReader {
-    public void readSasFile(String filePath) throws Exception {
+    private SasFileReader sasFileReader;  // Declare instance variable
+    private SasFileProperties props;      // Declare variable to hold properties
+
+    public SasReader(String filePath) {
         try (InputStream inputStream = new FileInputStream(filePath)) {
-            SasFileReader sasFileReader = new SasFileReaderImpl(inputStream);
-            Object[] row;
-            while ((row = sasFileReader.readNext()) != null) {
-                // Process the row data
-            }
+            this.sasFileReader = new SasFileReaderImpl(inputStream);
+        } catch (Exception e) {
+            System.out.println("Error initializing SAS file reader: " + e.getMessage());
         }
     }
 
-    public static void main(String [] args){
-        String date_sample_file = "/mnt/hgfs/ubuntu_share/data_set/sas_sample/dates_binary.sas7bdat";
-        SasReader reader = new SasReader();
-        try {
-            reader.readSasFile(date_sample_file);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    public void readSasFileProperties() {
+        if (this.sasFileReader != null) {
+            props = this.sasFileReader.getSasFileProperties();
+            System.out.println("SAS File Properties: " + props);
+        } else {
+            System.out.println("SAS file reader is not initialized.");
         }
+    }
+
+    public void getSasFileColumns() {
+        List<Column> columns = this.sasFileReader.getColumns();
+        for (Column column : columns) {
+            System.out.println("Column name: "+ column.getName());
+            System.out.println("Column type: "+ column.getType());
+            System.out.println("Column format: "+column.getFormat().toString());
+        }
+    }
+
+    public static void main(String[] args) {
+        String dateSampleFile = "/mnt/hgfs/ubuntu_share/data_set/sas_sample/dates_binary.sas7bdat";
+        SasReader reader = new SasReader(dateSampleFile);
+        reader.getSasFileColumns();  // Corrected method call
     }
 }
-
-
